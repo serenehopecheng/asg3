@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>World</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="400" height="400">
+    Please use a browser that supports "canvas"
+    </canvas>
+    <!-- <p id="numdot" ></p> -->
+
+  
+    <p>
+      Camera Angle <input type="range" min="0" max="90" value="5" class="slider" id="angleSlide" title = "Camera Angle">
+    </p> 
+  <h2>Student Info</h2>
+  <p><strong>Name:</strong> Serene Cheng</p>
+  <p><strong>Email:</strong> scheng43@ucsc.edu</p>
+
+  <p><strong>Notes to grader:</strong></p>
+    <p>
+      Hello. Here is my giraffe. I have tried to earn every point on the rubric. <br>
+      Some notes include: <br>
+      The third level joint is an ear.
+    </p> 
+
+
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="Point.js"></script>
+    <script src="Triangle.js"></script>
+    <script src="Circle.js"></script>
+    <script src="../lib/cuon-matrix.js"></script>
+    <script src="Cube.js"></script>
+    <script src="Sphere.js"></script>
+    <script src="Prism.js"></script>
+    <script src="World.js"></script>
+  </body>
+</html>

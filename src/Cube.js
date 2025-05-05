@@ -1,34 +1,30 @@
 class Cube {
-    constructor() {
-      this.type = 'cube';
-      this.position = [0.0, 0.0, 0.0];
-      this.color = [1.0, 0.1, 0.1, 1.0];
-      // this.size = 5.0;
-      // this.segments = 10;
-      this.matrix = new Matrix4();
-      this.textureNum = -1;
-    }
-  
-    render() {
-      console.log("textureNum:", this.textureNum);
-      drawCube(this.matrix, this.color, this.textureNum);
-    }
-    
+  constructor() {
+    this.type = 'cube';
+    // this.position = [0.0, 0.0, 0.0];
+    this.color = [1.0, 0.1, 0.1, 1.0];
+    // this.size = 5.0;
+    // this.segments = 10;
+    this.matrix = new Matrix4();
+    this.textureNum = 0;
   }
 
-  function drawCube(matrix, color, texture) {
-    console.log("texture:", texture);
-    // Set transformation matrix
-    gl.uniformMatrix4fv(u_ModelMatrix, false, matrix.elements);
+  render() {
+    // var xy = this.position;
+    var rgba = this.color;
+    // var size = this.size;
 
-    // pass texture
-    gl.uniform1i(u_whichTexture, texture);
-  
-    // Set fragment color
-    gl.uniform4f(u_FragColor, color[0], color[1], color[2], color[3]);
-  
+    gl.uniform1f(u_texColorWeight, 0.5); 
+    // Pass the texture number
+    gl.uniform1i(u_whichTexture, this.textureNum);
+
+    // Pass the color of a point to u_FragColor uniform variable
+    gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
+
+    // Pass the matrix to u_ModelMatrix attribute
+    gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
+
     // FRONT face
-    gl.uniform4f(u_FragColor, color[0], color[1], color[2], color[3]);
     drawTriangle3DUV( [0,0,0,  1,1,0,  1,0,0], [0,0, 1,1, 1,0] );
     drawTriangle3DUV( [0,0,0,  0,1,0,  1,1,0], [0,0, 0,1, 1,1] );
   
@@ -53,4 +49,4 @@ class Cube {
     drawTriangle3DUV([0,1,0,  0,1,1,  1,1,1], [0,0, 0,1, 1,1]);
   }
   
-  
+}

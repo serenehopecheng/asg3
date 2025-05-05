@@ -10,8 +10,12 @@ var VSHADER_SOURCE = `
   uniform mat4 u_ViewMatrix;
   uniform mat4 u_ProjectionMatrix;
   void main() {
-    gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
-    v_UV = a_UV;
+  gl_Position = u_ProjectionMatrix
+              * u_ViewMatrix
+              * u_GlobalRotateMatrix
+              * u_ModelMatrix
+              * a_Position;
+  v_UV = a_UV;
   }
 `;
 
@@ -22,13 +26,21 @@ var FSHADER_SOURCE = `
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
   uniform int u_whichTexture;
+  uniform float u_texColorWeight;
+
   void main() {
+    vec4 baseColor = u_FragColor;
+    vec4 texColor = texture2D(u_Sampler0, v_UV);
+    vec4 blendedColor = mix(baseColor, texColor, u_texColorWeight);
+
     if (u_whichTexture == -2) {
-      gl_FragColor = u_FragColor;                     // Use color
+      gl_FragColor = baseColor;                     // Use color
     } else if (u_whichTexture == -1) {
       gl_FragColor = vec4(v_UV, 1.0, 1.0);            // Use UV debug color
     } else if (u_whichTexture == 0) {
-      gl_FragColor = texture2D(u_Sampler0, v_UV);     // Use texture0
+      gl_FragColor = texColor;     // Use texture0
+    } else if (u_whichTexture == -3) {
+      gl_FragColor = blendedColor;            // Use UV debug color
     } else {
       gl_FragColor = vec4(1.2, 1.2, 1.2, 1);           // Error, put reddish
     }
@@ -57,6 +69,8 @@ let u_ProjectionMatrix;
 let u_ViewMatrix;
 let u_GlobalRotateMatrix;
 let u_whichTexture;
+let u_texColorWeight;
+let camera;
 
 function setupWebGL() {
   // Retrieve <canvas> element
@@ -138,14 +152,22 @@ function connectVariablesToGLSL() {
     }
 
     u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
+    // console.log("u_whichTexture is", u_whichTexture);
     if (!u_whichTexture) {
       console.log('Failed to get the storage location of u_whichTexture');
+      return;
+    }
+
+    u_texColorWeight = gl.getUniformLocation(gl.program, 'u_texColorWeight');
+    if (!u_texColorWeight) {
+      console.log('Failed to get the storage location of u_texColorWeight');
       return;
     }
 
   // Set an initial value for this matrix to identity
   var identityM = new Matrix4();
   gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
+
 
 }
 
@@ -224,7 +246,11 @@ function main() {
   
   addActionsForHtmlUI();
 
+  document.onkeydown = keydown;
+
   initTextures();
+
+  camera = new Camera();
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -232,23 +258,64 @@ function main() {
   renderAllShapes();
   // Clear <canvas>
   // gl.clear(gl.COLOR_BUFFER_BIT);
-
-  requestAnimationFrame(tick);
-
 }
 
-var g_startTime = performance.now() / 1000.0;
-var g_seconds   = performance.now() / 1000.0 - g_startTime;
+var g_eye = [0, 0, 3];
+var g_at = [0.0, 0.0, -100];
+var g_up = [0, 1, 0];
 
-function tick() {
-  g_seconds = performance.now() / 1000.0 - g_startTime;
-  // console.log(g_seconds);
-  
+function keydown(ev) {
+  switch (ev.key) {
+    case 'w':
+    case 'W':
+      camera.moveForward();
+      break;
+    case 's':
+    case 'S':
+      camera.moveBackwards();
+      break;
+    case 'a':
+    case 'A':
+      camera.moveLeft();
+      break;
+    case 'd':
+    case 'D':
+      camera.moveRight();
+      break;
+    case 'q':
+    case 'Q':
+      camera.panLeft();
+      break;
+    case 'e':
+    case 'E':
+      camera.panRight();
+      break;
+  }
+
   renderAllShapes();
-  requestAnimationFrame(tick);
 }
 
 function renderScene() {
+  // Pass the projection matrix
+  var projMat = new Matrix4();
+  projMat.setPerspective(50, 1*canvas.width/canvas.height, 1, 100);
+  gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+
+  // Pass the view matrix
+  var viewMat = new Matrix4();
+  // viewMat.setLookAt(g_eye[0], g_eye[1], g_eye[2], g_at[0], g_at[1], g_at[2], g_up[0], g_up[1], g_up[2]);
+  // viewMat.setLookAt(
+  //   g_camera.eye.x, g_camera.eye.y, g_camera.eye.z,
+  //   g_camera.at.x, g_camera.at.y, g_camera.at.z,
+  //   g_camera.up.x, g_camera.up.y, g_camera.up.z); 
+  // viewMat.setLookAt(0,0,3, 0,0,-100, 0,1,0); // (eye, at, up)
+  viewMat.setLookAt(
+    camera.eye.elements[0], camera.eye.elements[1], camera.eye.elements[2],
+    camera.at.elements[0], camera.at.elements[1], camera.at.elements[2],
+    camera.up.elements[0], camera.up.elements[1], camera.up.elements[2]
+  );
+  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+  
   // Global rotation matrix (based on slider value)
   let globalRotMat = new Matrix4()
     .scale(0.5, 0.5, 0.5)    
@@ -265,14 +332,8 @@ function renderScene() {
 
   let cube = new Cube();
   cube.color = [1.0, 0.0, 0.0, 1.0];
-  cube.textureNum = 0; // This should show a UV debug gradient
+  cube.textureNum = -3; // This should show a UV debug gradient
   cube.render();
-
-  // drawGiraffe();
-  // var body = new Prism();
-  // body.color = [237/255, 207/255, 143/255, 1.0];
-  // body.render();
-
 }
 
 

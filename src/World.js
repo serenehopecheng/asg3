@@ -176,29 +176,11 @@ let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 5;
 let g_globalAngle = 5
 
-let g_rightArm = 5;
-let g_rightForearm = -10;
-let g_leftArm = 5;
-let g_leftForearm = -10;
-let g_leftLeg = 5;
-let g_leftCalf = -10;
-let g_rightLeg = 5;
-let g_rightCalf = -10;
-let g_animation = false;
-let g_neck = 2;
-let g_head = -2;
-let g_rightEar = 1;
-let g_leftEar = 1;
-
 let g_rotX = 0;   
 let g_rotY = 0;  
 
 let g_dragging = false;
 let g_lastX = 0, g_lastY = 0;
-
-let g_poking = false;
-let g_pokeStart = 0;
-const POKE_LENGTH = 2.0;
 
 // Set up actions for the HTML UI elements
 function addActionsForHtmlUI() {
@@ -330,11 +312,59 @@ function renderScene() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 
-  let cube = new Cube();
-  cube.color = [1.0, 0.0, 0.0, 1.0];
-  cube.textureNum = -3; // This should show a UV debug gradient
-  cube.render();
+  // let cube = new Cube();
+  // cube.color = [1.0, 0.0, 0.0, 1.0];
+  // cube.textureNum = -3; 
+  // cube.matrix.setTranslate(0, 0, 3);
+  // cube.render();
+
+  let ground = new Cube();
+  ground.color = [1, 0, 0, 1.0]; 
+  ground.textureNum = -2;
+  ground.matrix.translate(0, -0.75, 0.0);
+  ground.matrix.scale(10, 0, 10);
+  ground.matrix.translate(-0.5, 0, -0.5);
+  ground.render();
+
+  var sky = new Cube();
+  sky.textureNum = -1;
+  sky.color = [0, 0, 1, 1.0]; 
+  sky.matrix.scale(50, 50, 50);
+  sky.matrix.translate(-0.5, -0.5, -0.5);
+  sky.render();
+
+  drawMap();
+
 }
+
+var g_map = [
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+];
+
+function drawMap() {
+  for (x = 0; x < 32; x++) {
+    for (y = 0; y < 32; y++) {
+      //console.log(x, y);
+      if (x == 0 || x == 31 || y == 0 || y == 31) {
+        var body = new Cube();
+        body.color = [0.36, 0.25, 0.20, 1.0];
+        body.matrix.translate(0, -0.75, 0);
+        body.matrix.scale(0.3, 0.3, 0.3);
+        body.matrix.translate(x - 16, 0, y - 16);
+        body.render();
+      }
+    }
+  }
+}
+
+
 
 
 // Draw every shape that is supposed to be in the canvas

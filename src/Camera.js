@@ -44,6 +44,15 @@ class Camera {
         a.elements[2] + b.elements[2]
       ]);
     }
+
+    clampHeight(minY = 0) {
+        if (this.eye.elements[1] < minY) {
+          this.eye.elements[1] = minY;
+        }
+        if (this.at.elements[1] < minY) {
+          this.at.elements[1] = minY;
+        }
+      }
   
     // had ChatGPT help me with this function
     moveForward(speed = 0.2) {
@@ -56,6 +65,7 @@ class Camera {
       f = this.scaleVector(f, speed);
       this.eye = this.addVectors(this.eye, f);
       this.at = this.addVectors(this.at, f);
+      this.clampHeight(0);
     }
   
     moveBackwards(speed = 0.2) {
@@ -68,6 +78,8 @@ class Camera {
       b = this.scaleVector(b, speed);
       this.eye = this.addVectors(this.eye, b);
       this.at = this.addVectors(this.at, b);
+      this.clampHeight(0);
+      this.clampHeight(0);
     }
   
     moveLeft(speed = 0.2) {
@@ -82,6 +94,7 @@ class Camera {
       s = this.scaleVector(s, speed);
       this.eye = this.addVectors(this.eye, s);
       this.at = this.addVectors(this.at, s);
+      this.clampHeight(0);
     }
   
     moveRight(speed = 0.2) {
@@ -96,6 +109,7 @@ class Camera {
       s = this.scaleVector(s, speed);
       this.eye = this.addVectors(this.eye, s);
       this.at = this.addVectors(this.at, s);
+      this.clampHeight(0);
     }
   
     panLeft(alpha = 2) {
@@ -108,6 +122,7 @@ class Camera {
       rotationMatrix.setRotate(alpha, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
       let f_prime = rotationMatrix.multiplyVector3(f);
       this.at = this.addVectors(this.eye, f_prime);
+      this.clampHeight(0);
     }
   
     panRight(alpha = 2) {
@@ -120,6 +135,7 @@ class Camera {
       rotationMatrix.setRotate(-alpha, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
       let f_prime = rotationMatrix.multiplyVector3(f);
       this.at = this.addVectors(this.eye, f_prime);
+      this.clampHeight(0);
     }
 
     forward() {
@@ -153,6 +169,11 @@ class Camera {
         this.at = this.at.subtract(s);
         this.eye = this.eye.subtract(s);
     }
+
+    onMove(dx, dy, sensitivity = 0.5) {
+        const alpha = dx * sensitivity;
+        this.panLeft(alpha);  
+      }
   }
   
   

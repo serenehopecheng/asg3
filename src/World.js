@@ -220,6 +220,7 @@ function addActionsForHtmlUI() {
     g_globalAngle = this.value;
     renderAllShapes();
   });
+
 }
 
 function onMove(e){
@@ -330,8 +331,8 @@ function renderScene() {
     .scale(0.5, 0.5, 0.5)    
     .translate(0, -0.5, 0)
     .rotate(g_globalAngle, 0, 1, 0)   
-    .rotate(g_rotY, 0, 1, 0)   
-    .rotate(g_rotX, 1, 0, 0);
+    .rotate(g_rotY, 1, 0, 0)   
+    .rotate(g_rotX, 0, 1, 0);
     // .rotate(g_globalAngle, 0, 1, 0);
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
